@@ -1,0 +1,11 @@
+numpy
+flask
+flask-sqlalchemy
+sqlalchemy
+psycopg2-binary
+uvicorn
+python-multipart
+pgvector
+insightface
+opencv-python
+onnxruntime

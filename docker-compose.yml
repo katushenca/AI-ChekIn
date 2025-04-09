@@ -1,0 +1,31 @@
+services:
+  app:
+    build: .
+    depends_on:
+      - db
+    ports:
+      - "8000:8000"
+    environment:
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_NAME: embedding_db
+      DB_USER: embedding_user
+      DB_PASSWORD: embedding_password
+    volumes:
+      - insightface_models:/root/.insightface/models
+
+  db:
+    image: ankane/pgvector
+    restart: always
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: embedding_db
+      POSTGRES_USER: embedding_user
+      POSTGRES_PASSWORD: embedding_password
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  insightface_models:
+  postgres_data:
