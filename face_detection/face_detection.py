@@ -1,13 +1,14 @@
 import numpy as np
 from numpy import ndarray
 import cv2
+from insightface.app import FaceAnalysis
 
 ATTEMPTS = 3
 
 class FaceDetection:
     @staticmethod
     def detect_face(img_bytes: bytes) -> None | ndarray:
-        """ Возвращает ndarray обрезанное лицо если нашел, или None если нет лиц или > 1"""
+        """ Возвращает ndarray обрезанное лицо если нашел (первое лицо), или None если нет лиц"""
         np_array_image = FaceDetection.get_nparray_from_bytes_image(img_bytes)
         if np_array_image is None:
             return None
@@ -21,14 +22,16 @@ class FaceDetection:
                         cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
                     gray_image = cv2.cvtColor(np_array_image, cv2.COLOR_BGR2GRAY)
                     faces = face_cascade.detectMultiScale(gray_image, scaleFactor=1.05, minNeighbors=5,
-                                                          minSize=(minx, miny))
+                                                          minSize=(300, 300))
                     if len(faces) == 0:
+                        print('No faces')
                         raise ValueError()
                     faces = FaceDetection.filter_duplicates(faces)
                     if len(faces) > 1:
-                        raise ValueError()
+                        print("many faces!")
                     x, y, w, h = faces[0]
-                    cropped_face = np_array_image[y:y + h, x:x + w]
+                    cropped_face = np_array_image[y-200:y + h + 200, x - 200:x + w + 200]
+                    cv2.imwrite("output_image.jpg", cropped_face, [cv2.IMWRITE_JPEG_QUALITY, 90])
                     return cropped_face
                 except ValueError as e:
                     exception = e
@@ -91,3 +94,30 @@ class FaceDetection:
                 filtered_faces.append(faces[i])
 
         return filtered_faces
+
+    # Initialize face_detection analysis model
+
+    @staticmethod
+    def get_face_embedding(image_path):
+        """Extract face_detection embedding from an image"""
+        with open(image_path, 'rb') as f:
+            img_bytes = f.read()
+        app = FaceAnalysis(name='buffalo_l', providers=[
+            'CPUExecutionProvider'])  # Use 'CUDAExecutionProvider' for GPU
+        app.prepare(ctx_id=-1)  # ctx_id=-1 for CPU, 0 for GPU
+        img = cv2.imread(image_path)
+        if img is None:
+            raise ValueError(f"Could not read image: {image_path}")
+
+        faces = app.get(img)
+        np_array_image = FaceDetection.get_nparray_from_bytes_image(img_bytes)
+        if len(faces) < 1:
+            raise ValueError("No faces detected in the image")
+        if len(faces) > 1:
+            print("Warning: Multiple faces detected. Using first detected face_detection")
+        x, y, w, h = faces[0].bbox
+        cropped_face = np_array_image[y:y + h, x:x + w]
+        cv2.imwrite("output_image.jpg", cropped_face, [cv2.IMWRITE_JPEG_QUALITY, 90])
+        return faces[0].embedding
+
+

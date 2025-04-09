@@ -1,5 +1,5 @@
 import unittest
-from face import face_detection
+import face_detection
 import os
 
 def read_images(directory):
@@ -15,15 +15,18 @@ def read_images(directory):
 class TestIdentifyFace(unittest.TestCase):
     def test_identify_face_no_faces(self):
         for image, filename in read_images("TestPhotos/TestIdentifyFace_noFaces"):
-            result = face_detection.FaceDetection.detect_face(image)
-            self.assertEqual(result, None, msg=f"Failed on file: {filename}")
+           result = face_detection.FaceDetection.detect_face(image)
+           self.assertEqual(result, None, msg=f"Failed on file: {filename}")
+        #face_detection.FaceDetection.get_face_embedding("TestPhotos/TestIdentifyFace_noFaces/mask.jpg")
 
     def test_identify_face_more_than_one_faces(self):
         for image, filename in read_images("TestPhotos/TestIdentifyFace_More_Than_One_Face"):
-            result = face_detection.FaceDetection.detect_face(image)
-            self.assertEqual(result, None, msg=f"Failed on file: {filename}")
+          result = face_detection.FaceDetection.detect_face(image)
+          self.assertEqual(result, None, msg=f"Failed on file: {filename}")
+        #face_detection.FaceDetection.get_face_embedding("TestPhotos/TestIdentifyFace_More_Than_One_Face/slava2.jpg")
 
     def test_identify_face_true(self):
         for image, filename in read_images("TestPhotos/TestIdentifyFace_one_face"):
-            result = face_detection.FaceDetection.detect_face(image)
-            self.assertIsNotNone(result, msg=f"Face not detected in file: {filename}")
+           result = face_detection.FaceDetection.detect_face(image)
+           self.assertIsNotNone(result, msg=f"Face not detected in file: {filename}")
+        #face_detection.FaceDetection.get_face_embedding("TestPhotos/TestIdentifyFace_one_face/1 (173).jpg")
