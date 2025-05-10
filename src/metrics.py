@@ -4,7 +4,7 @@ import process
 
 
 def get_all_path_pairs(dir: str):
-    """По заданному пути к директории возвращает последовательность пар
+    """По заданному к директории пути возвращает последовательность пар
     лежащих в ней файлов"""
     files = [os.path.join(dir, f) for f in os.listdir(dir) if
              os.path.isfile(os.path.join(dir, f))]
@@ -14,7 +14,9 @@ def get_all_path_pairs(dir: str):
 
 
 def get_accuracy_and_av_time(path_to_dataset: str, threshold: float = 0.65):
-    """По заданному пути к датасету возвращает accuracy и average time"""
+    """По заданному к датасету пути возвращает accuracy и average time
+    У одинаковых людей первые два символа в названии файла одинаковые.
+    Если у объекта несколько фото, у него первый символ в имени буква."""
     true_count = 0
     total_count = 0
     total_time = 0
@@ -24,11 +26,11 @@ def get_accuracy_and_av_time(path_to_dataset: str, threshold: float = 0.65):
         emb2 = process.get_face_embedding(file2)
         score = process.compare_faces(emb1, emb2, threshold)[0]
         end = time.time()
-        file1_name = file1.split('\\')[-1]
-        file2_name = file1.split('\\')[-1]
+        file1_name = os.path.basename(file1)
+        file2_name = os.path.basename(file2)
         if score is None:
             continue
-        if file1_name[0] == file2_name[0] and score >= threshold:
+        if file1_name[0].isalpha() and file1_name[:2] == file2_name[:2] and score >= threshold:
             true_count += 1
         elif score < threshold:
             true_count += 1
@@ -36,4 +38,7 @@ def get_accuracy_and_av_time(path_to_dataset: str, threshold: float = 0.65):
         total_count += 1
         total_time += end - start
 
-    return true_count / total_count, total_count / total_count
+    accuracy = true_count / total_count if total_count > 0 else 0
+    average_time = total_time / total_count if total_count > 0 else 0
+
+    return accuracy, average_time
